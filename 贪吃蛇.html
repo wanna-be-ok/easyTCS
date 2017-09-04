@@ -38,7 +38,7 @@
     var arr=[];//用来存储 蛇位移过的位置
     var xss=[];//存储 事物出现的位置
     var en,an,bn,cn,dn;//上下左右键执行函数
-
+//    var ck=[];
 
    var can=document.querySelector('#can');
    function cz(t,u,e,q){
@@ -60,7 +60,16 @@
                 //将坐标x保存在数组中
                 arr.push(u);
                 //将坐标y保存在数组中
-//                console.log(e+'=='+q+'=='+g)
+
+ //尝试将蛇身的所有点放到一个数组内，将蛇头的坐标与数组内的数组项进行比较，如果数组第n（n为双数，及x坐标）与n+1与蛇头相同 及视为头撞蛇身
+ // 132~136行是比较过程，然而在运行中浏览器崩溃，怀疑原因是内存泄漏，尚未找到解决办法
+//                var len=arr.length;
+//                if(len>8){
+//                    ck=arr.slice(arr.length-8-g,arr.length);
+//                }else{
+//                    ck=arr;
+//                }
+//                console.log(ck)
             }
         }
 
@@ -74,9 +83,6 @@
         context.fillStyle='green';
         context.fillRect(index*20,yin*20,20,20);
         //画出目标点
-//        if(index>arr[num-e-g]/20 && index<arr[num-2] && yin>arr[num-q-g] && yin<arr[num-1]){ sz()}
-        //之前的想法当目标点x坐标和y坐标同时都在 arr（蛇身坐标覆盖区域）中时 重新执行 随机数组 出现新的目标 但是执行的时候发现效果不对而且偶尔会出现两个目标
-
         xss.push(index);
         xss.push(yin);
         //保存出现过目标的坐标上x下y
@@ -86,11 +92,7 @@
         en=setInterval('sij()',200);
        //启动函数 两百毫秒执行一次
    };
-
-
    ii=20;//设置蛇头开始位置
-
-
    function sij(){
        //向上运动 原点在左上角 所以是--，每运动一次arr数组都会多两个项，双数位置是x坐标 单数位置是y坐标
         ii--;
@@ -122,14 +124,19 @@
             clearInterval(an);
             //出界提示失败 同时停止自身计时器
         }
-       if(h == xss[g+1] && z==xss[g]){
+        if(h == xss[g+1] && z==xss[g]){
            g=g+2;
            sz();
            //吃掉目标 刷新目标 增加长度
-       }
-//       if((num-2)==(num-e-g) && (num-1)==(num-q-g)){
-//           alert('123')
+        }
+
+//       for(var i=0;i<ck.length;){
+//           if(ck[i]==z*20 && ck[i+1] ==h*20){
+//                        alert('123')
+//           }
 //       }
+
+
        //理想状态是 蛇头当前的x坐标等于蛇身某点的x坐标并且 蛇头y坐标等于蛇身同一点的y坐标 即为相撞  但是没实现 逻辑不对
 
     }
