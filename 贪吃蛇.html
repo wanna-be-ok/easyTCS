@@ -38,7 +38,7 @@
     var arr=[];//用来存储 蛇位移过的位置
     var xss=[];//存储 事物出现的位置
     var en,an,bn,cn,dn;//上下左右键执行函数
-//    var ck=[];
+    var ck=[];
 
    var can=document.querySelector('#can');
    function cz(t,u,e,q){
@@ -63,13 +63,13 @@
 
  //尝试将蛇身的所有点放到一个数组内，将蛇头的坐标与数组内的数组项进行比较，如果数组第n（n为双数，及x坐标）与n+1与蛇头相同 及视为头撞蛇身
  // 132~136行是比较过程，然而在运行中浏览器崩溃，怀疑原因是内存泄漏，尚未找到解决办法
-//                var len=arr.length;
-//                if(len>8){
-//                    ck=arr.slice(arr.length-8-g,arr.length);
-//                }else{
-//                    ck=arr;
-//                }
-//                console.log(ck)
+                var len=arr.length;
+                if(len>8){
+                    ck=arr.slice(arr.length-8-g,arr.length);
+                }else{
+                    ck=arr;
+                }
+                console.log(ck)
             }
         }
 
@@ -116,6 +116,8 @@
        //左方向键 y及h值不动 x即z向原点方向移动 数值减小
         z--;
         num=num+2;
+       m=0;
+       //标记上下停止移动
        //执行一次增加俩数 用来搜索arr数组中的坐标
         cz(z*20,h*20,e,q);
        //z在不断变化 而h其实是不变的 eq为常量
@@ -130,21 +132,20 @@
            //吃掉目标 刷新目标 增加长度
         }
 
-//       for(var i=0;i<ck.length;){
-//           if(ck[i]==z*20 && ck[i+1] ==h*20){
-//                        alert('123')
-//           }
-//       }
-
-
-       //理想状态是 蛇头当前的x坐标等于蛇身某点的x坐标并且 蛇头y坐标等于蛇身同一点的y坐标 即为相撞  但是没实现 逻辑不对
-
+       for(var i=0;i<ck.length;i=i+2){
+           if(ck[i]==(z-1)*20 && ck[i+1] ==h*20){
+               alert('你撞到了身体');
+               clearInterval(an);
+           }
+       }
     }
    function xs(){
        //向上
         h--;
        //x即z不动 h即y动 向上 也是靠近零点 所以是--
         num=num+2;
+       n=0;
+       //标记左右移动状态
         cz(z*20,h*20,e,q);
        //z是不动的 h在减小
         if(h==-1){
@@ -157,12 +158,18 @@
            sz();
            //吃掉目标 刷新目标 增加长度
        }
-
+       for(var i=0;i<ck.length;i=i+2){
+           if(ck[i]==z*20 && ck[i+1] ==(h-1)*20){
+               alert('你撞到了身体');
+               clearInterval(bn);
+           }
+       }
     }
    function xy(){
        //向右 原离零点 z即x增加 h即y不动
         z++;
         num=num+2;
+       m=0;
         cz(z*20,h*20,e,q);
        //h是不变的 z在不断变大
         if(z==20){
@@ -175,12 +182,18 @@
            sz();
            //吃掉目标 刷新目标 增加长度
        }
-
+       for(var i=0;i<ck.length;i=i+2){
+           if(ck[i]==(z+1)*20 && ck[i+1] ==h*20){
+               alert('你撞到了身体');
+               clearInterval(cn);
+       }
+       }
     }
    function xx(){
        //向下 远离零点 x即z是不动的 h是不断增大
         h++;
         num=num+2;
+       n=0;
         cz(z*20,h*20,e,q);
         if(h==20){
             alert('你输了，请重新开始');
@@ -192,7 +205,12 @@
            sz();
            //吃掉目标 刷新目标 增加长度
        }
-
+       for(var i=0;i<ck.length;i=i+2){
+           if(ck[i]==z*20 && ck[i+1] ==(h+1)*20){
+               alert('你撞到了身体');
+               clearInterval(dn);
+           }
+       }
     }
    EventUtil.addHandler(window,'keyup',function(event){
        //用了监听脚本 绑定了键盘keyup事件
@@ -208,8 +226,6 @@
                         clearInterval(bn);
                         clearInterval(cn);
                         clearInterval(dn);
-                            m=0;
-                        //标记上下停止移动
                             n=1;
                         //标记左右的方向 1为左
                             h= arr[num-1]/20;//是y方向
@@ -229,8 +245,6 @@
                        clearInterval(en);
                        clearInterval(cn);
                        clearInterval(dn);
-                       n=0;
-                       //标记左右移动状态
                        m=1;
                        //标记上下移动状态 1为上
                        h= arr[num-1]/20;
@@ -249,7 +263,6 @@
                         clearInterval(en);
                         clearInterval(bn);
                         clearInterval(dn);
-                        m=0;
                         n=2;
                         h= arr[num-1]/20;
                         z=arr[num-2]/20;
@@ -265,7 +278,6 @@
                         clearInterval(bn);
                         clearInterval(cn);
                         clearInterval(en);
-                        n=0;
                         m=2;
                         h= arr[num-1]/20;
                         z=arr[num-2]/20;
