@@ -15,23 +15,17 @@
     <p>这是一个简易贪吃蛇游戏，上、下、左、右来控制方向。点击重置按钮可以重置。</p>
 <script>
 
-//控制方向：根据键盘事件确定按了那个方向键
-//移动：使用计时器 不断重画 产生移动效果  实现方法比较low  有四个计时器 期待优化
-//保留蛇身： 选择使用数组保留蛇头移动过的位置 然后根绝保留蛇身的长度 计算并清除 不要的蛇尾
-//目标：将canvas区域划分为 xy两个方向上随机可能出现的点 共有20*20个可能性 通过两个随机数组 来组合实现不同位置
-//吃掉目标，增长蛇身： 当蛇头坐标等于目标坐标 就将目标清除 并增长一个单位蛇身 增加两个位置长度的 数组项索引
+/*控制方向：根据键盘事件确定按了那个方向键
+*移动：使用计时器 不断重画 产生移动效果  实现方法比较low  有四个计时器 期待优化
+*保留蛇身： 选择使用数组保留蛇头移动过的位置 然后根绝保留蛇身的长度 计算并清除 不要的蛇尾
+*目标：将canvas区域划分为 xy两个方向上随机可能出现的点 共有20*20个可能性 通过两个随机数组 来组合实现不同位置
+*吃掉目标，增长蛇身： 当蛇头坐标等于目标坐标 就将目标清除 并增长一个单位蛇身 增加两个位置长度的 数组项索引
+*但是需要对保留蛇身出现位置的数组进行管理 去掉蛇身位置的坐标数组项同时去除 只保留目前蛇身坐标*/
 
-
-
-//还有一个问题没解决，头撞蛇身！！！目前是无敌蛇~~ 假设：可不可以进行数组去重，如果 数组项单数点相同切上一个双数点也相同 就说明有了重复的两点坐标
-// 但是需要对保留蛇身出现位置的数组进行管理 去掉蛇身位置的坐标数组项同时去除 只保留目前蛇身坐标
-
-//存在bug 折返爬 快速按调整两次方向 会出现反向爬行  但是我把速度调快了现在应该不好实现  还有一个就是半无敌蛇 好尴尬--
     var n=0;//mn确定按了那个方向键 同时验证 上下运行是 上下键无效 左右有效
     var m=0;
     var q=9;//用来确定位移过的坐标
     var e=10;
-
     var g=0;//记录重新出现的 绿点
     var ii=0;//启动函数
     var num=0;//数组项位置 等于arr.length
@@ -39,7 +33,6 @@
     var xss=[];//存储 事物出现的位置
     var en,an,bn,cn,dn;//上下左右键执行函数
     var ck=[];
-
    var can=document.querySelector('#can');
    function cz(t,u,e,q){
    //t是新蛇头的x u是y e和q其实是一个常量 不放这个参数其实也行
@@ -61,15 +54,14 @@
                 arr.push(u);
                 //将坐标y保存在数组中
 
- //尝试将蛇身的所有点放到一个数组内，将蛇头的坐标与数组内的数组项进行比较，如果数组第n（n为双数，及x坐标）与n+1与蛇头相同 及视为头撞蛇身
- // 132~136行是比较过程，然而在运行中浏览器崩溃，怀疑原因是内存泄漏，尚未找到解决办法
+ //解决思路，创建一个新数组，将蛇身现有的坐标保存在数组内，通过计算下一个蛇头的坐标去数组内对比，若符合“组合”的一组坐标存在于ck数组中则说明头撞蛇身
                 var len=arr.length;
                 if(len>8){
                     ck=arr.slice(arr.length-8-g,arr.length);
                 }else{
                     ck=arr;
                 }
-                console.log(ck)
+//                console.log(ck)
             }
         }
 
@@ -77,8 +69,6 @@
     //随机数组，floor向下取整，保证0,0的出现  random 0~1 随机数*19 表示从十九个数中随机
         var index= Math.floor(Math.random()*19);
         var yin=Math.floor(Math.random()*19);
-//        console.log(index+'--'+yin);
-
         var context=can.getContext('2d');
         context.fillStyle='green';
         context.fillRect(index*20,yin*20,20,20);
@@ -98,6 +88,7 @@
         ii--;
         num+=2;
         cz(200,ii*20,e,q);
+       m=1;
        //eq都是给定值 可以根据蛇身长度来调节 以后增加功能 前两个参数 是蛇头的坐标点
 //        console.log(ii+'--'+num);
         if(ii==-1){
@@ -113,104 +104,125 @@
        }
     }
    function xz(){
-       //左方向键 y及h值不动 x即z向原点方向移动 数值减小
-        z--;
-        num=num+2;
-       m=0;
-       //标记上下停止移动
-       //执行一次增加俩数 用来搜索arr数组中的坐标
-        cz(z*20,h*20,e,q);
-       //z在不断变化 而h其实是不变的 eq为常量
-        if(z==-1){
-            alert('你输了，请重新开始');
-            clearInterval(an);
-            //出界提示失败 同时停止自身计时器
-        }
-        if(h == xss[g+1] && z==xss[g]){
-           g=g+2;
-           sz();
-           //吃掉目标 刷新目标 增加长度
-        }
-
+       var oo=true;
        for(var i=0;i<ck.length;i=i+2){
            if(ck[i]==(z-1)*20 && ck[i+1] ==h*20){
-               alert('你撞到了身体');
-               clearInterval(an);
+               oo=false;
            }
+       }
+       m=0;
+       if(oo){
+           //左方向键 y及h值不动 x即z向原点方向移动 数值减小
+           z--;
+           num=num+2;
+
+           //标记上下停止移动
+           //执行一次增加俩数 用来搜索arr数组中的坐标
+           cz(z*20,h*20,e,q);
+           //z在不断变化 而h其实是不变的 eq为常量
+           if(z==-1){
+               alert('你输了，请重新开始');
+               clearInterval(an);
+               //出界提示失败 同时停止自身计时器
+           }
+           if(h == xss[g+1] && z==xss[g]){
+               g=g+2;
+               sz();
+               //吃掉目标 刷新目标 增加长度
+           }
+       }else{
+           alert('你撞到了身体');
+           clearInterval(an);
        }
     }
    function xs(){
-       //向上
-        h--;
-       //x即z不动 h即y动 向上 也是靠近零点 所以是--
-        num=num+2;
-       n=0;
-       //标记左右移动状态
-        cz(z*20,h*20,e,q);
-       //z是不动的 h在减小
-        if(h==-1){
-            alert('你输了，请重新开始');
-            clearInterval(bn);
-//出界提示失败 同时停止自身计时器
-        }
-       if(h ==xss[g+1] && z==xss[g]){
-           g=g+2;
-           sz();
-           //吃掉目标 刷新目标 增加长度
-       }
+       var bb=true;
        for(var i=0;i<ck.length;i=i+2){
            if(ck[i]==z*20 && ck[i+1] ==(h-1)*20){
-               alert('你撞到了身体');
-               clearInterval(bn);
+               bb=false;
            }
+       }
+       n=0;
+       if(bb){
+           //向上
+           h--;
+           //x即z不动 h即y动 向上 也是靠近零点 所以是--
+           num=num+2;
+
+           //标记左右移动状态
+           cz(z*20,h*20,e,q);
+           //z是不动的 h在减小
+           if(h==-1){
+               alert('你输了，请重新开始');
+               clearInterval(bn);
+//出界提示失败 同时停止自身计时器
+           }
+           if(h ==xss[g+1] && z==xss[g]){
+               g=g+2;
+               sz();
+               //吃掉目标 刷新目标 增加长度
+           }
+       }else{
+           alert('你撞到了身体');
+           clearInterval(bn);
        }
     }
    function xy(){
-       //向右 原离零点 z即x增加 h即y不动
-        z++;
-        num=num+2;
-       m=0;
-        cz(z*20,h*20,e,q);
-       //h是不变的 z在不断变大
-        if(z==20){
-            alert('你输了，请重新开始');
-            clearInterval(cn);
-            //出界提示失败 同时停止自身计时器
-        }
-       if(h== xss[g+1] && z==xss[g]){
-           g=g+2;
-           sz();
-           //吃掉目标 刷新目标 增加长度
-       }
+       var cc=true;
        for(var i=0;i<ck.length;i=i+2){
            if(ck[i]==(z+1)*20 && ck[i+1] ==h*20){
-               alert('你撞到了身体');
-               clearInterval(cn);
+               cc=false;
+           }
        }
+       m=0;
+       if(cc){
+           //向右 原离零点 z即x增加 h即y不动
+           z++;
+           num=num+2;
+           cz(z*20,h*20,e,q);
+           //h是不变的 z在不断变大
+           if(z==20){
+               alert('你输了，请重新开始');
+               clearInterval(cn);
+               //出界提示失败 同时停止自身计时器
+           }
+           if(h== xss[g+1] && z==xss[g]){
+               g=g+2;
+               sz();
+               //吃掉目标 刷新目标 增加长度
+           }
+       }else{
+           alert('你撞到了身体');
+           clearInterval(cn);
        }
     }
    function xx(){
-       //向下 远离零点 x即z是不动的 h是不断增大
-        h++;
-        num=num+2;
-       n=0;
-        cz(z*20,h*20,e,q);
-        if(h==20){
-            alert('你输了，请重新开始');
-            clearInterval(dn);
-            //出界提示失败 同时停止自身计时器
-        }
-       if(h == xss[g+1] && z==xss[g]){
-           g=g+2;
-           sz();
-           //吃掉目标 刷新目标 增加长度
-       }
+       var dd=true;
        for(var i=0;i<ck.length;i=i+2){
            if(ck[i]==z*20 && ck[i+1] ==(h+1)*20){
-               alert('你撞到了身体');
-               clearInterval(dn);
+               dd=false;
            }
        }
+       n=0;
+      if(dd){
+          //向下 远离零点 x即z是不动的 h是不断增大
+          h++;
+          num=num+2;
+          cz(z*20,h*20,e,q);
+          if(h==20){
+              alert('你输了，请重新开始');
+              clearInterval(dn);
+              //出界提示失败 同时停止自身计时器
+          }
+          if(h == xss[g+1] && z==xss[g]){
+              g=g+2;
+              sz();
+              //吃掉目标 刷新目标 增加长度
+          }
+      }else{
+          alert('你撞到了身体');
+          clearInterval(dn);
+      }
     }
    EventUtil.addHandler(window,'keyup',function(event){
        //用了监听脚本 绑定了键盘keyup事件
